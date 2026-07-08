@@ -36,3 +36,21 @@ def extract_channel(image: np.ndarray, channel: str) -> np.ndarray:
     result = np.zeros_like(image)
     result[:, :, idx] = image[:, :, idx]
     return result
+
+
+def crop_image(image: np.ndarray, x1: int, y1: int, x2: int, y2: int) -> np.ndarray:
+    height, width = image.shape[:2]
+
+    if not (0 <= x1 < x2 <= width):
+        raise ValueError(
+            f"Некорректные координаты по X: x1={x1}, x2={x2} (ширина изображения: {width}). "
+            f"Должно выполняться 0 <= x1 < x2 <= {width}."
+        )
+
+    if not (0 <= y1 < y2 <= height):
+        raise ValueError(
+            f"Некорректные координаты по Y: y1={y1}, y2={y2} (высота изображения: {height}). "
+            f"Должно выполняться 0 <= y1 < y2 <= {height}."
+        )
+
+    return image[y1:y2, x1:x2].copy()

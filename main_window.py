@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QMessageBox,
     QPushButton,
+    QSpinBox,
     QVBoxLayout,
     QWidget,
 )
@@ -52,6 +53,37 @@ class MainWindow(QMainWindow):
             button.clicked.connect(lambda checked=False, ch=channel: self.on_show_channel(ch))
             channels_layout.addWidget(button)
         channels_layout.addStretch()
+
+        crop_layout = QHBoxLayout()
+        root_layout.addLayout(crop_layout)
+
+        crop_layout.addWidget(QLabel("Обрезка: X1"))
+        self.crop_x1_spin = QSpinBox()
+        self.crop_x1_spin.setRange(0, 100000)
+        crop_layout.addWidget(self.crop_x1_spin)
+
+        crop_layout.addWidget(QLabel("Y1"))
+        self.crop_y1_spin = QSpinBox()
+        self.crop_y1_spin.setRange(0, 100000)
+        crop_layout.addWidget(self.crop_y1_spin)
+
+        crop_layout.addWidget(QLabel("X2"))
+        self.crop_x2_spin = QSpinBox()
+        self.crop_x2_spin.setRange(0, 100000)
+        self.crop_x2_spin.setValue(100)
+        crop_layout.addWidget(self.crop_x2_spin)
+
+        crop_layout.addWidget(QLabel("Y2"))
+        self.crop_y2_spin = QSpinBox()
+        self.crop_y2_spin.setRange(0, 100000)
+        self.crop_y2_spin.setValue(100)
+        crop_layout.addWidget(self.crop_y2_spin)
+
+        self.crop_button = QPushButton("Обрезать")
+        self.crop_button.clicked.connect(self.on_crop)
+        crop_layout.addWidget(self.crop_button)
+
+        crop_layout.addStretch()
 
         self.image_label = QLabel("Изображение не загружено")
         self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -102,6 +134,26 @@ class MainWindow(QMainWindow):
         result = image_ops.extract_channel(self.image, channel)
         self.show_image(result)
         self.statusBar().showMessage(f"Показан канал: {channel}")
+
+    def on_crop(self):
+        if self.image is None:
+            QMessageBox.warning(self, "Нет изображения", "Сначала загрузите изображение или сделайте снимок с камеры.")
+            return
+
+        x1 = self.crop_x1_spin.value()
+        y1 = self.crop_y1_spin.value()
+        x2 = self.crop_x2_spin.value()
+        y2 = self.crop_y2_spin.value()
+
+        try:
+            result = image_ops.crop_image(self.image, x1, y1, x2, y2)
+        except ValueError as e:
+            QMessageBox.critical(self, "Ошибка обрезки", str(e))
+            self.statusBar().showMessage("Ошибка при обрезке изображения")
+            return
+
+        self.show_image(result)
+        self.statusBar().showMessage(f"Обрезано: ({x1}, {y1}) - ({x2}, {y2})")
 
     def show_image(self, cv_img):
         rgb = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
