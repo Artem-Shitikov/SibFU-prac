@@ -61,3 +61,17 @@ def blur_image(image: np.ndarray, kernel_size: int) -> np.ndarray:
         raise ValueError(f"Размер ядра должен быть положительным числом, получено: {kernel_size}")
 
     return cv2.blur(image, (kernel_size, kernel_size))
+
+
+def draw_circle(image: np.ndarray, x: int, y: int, radius: int) -> np.ndarray:
+    height, width = image.shape[:2]
+
+    if not (0 <= x < width) or not (0 <= y < height):
+        raise ValueError(f"Центр круга ({x}, {y}) вне границ изображения ({width}x{height})")
+
+    if radius < 1:
+        raise ValueError(f"Радиус должен быть положительным числом, получено: {radius}")
+
+    result = image.copy()
+    cv2.circle(result, (x, y), radius, (0, 0, 255), thickness=3)
+    return result

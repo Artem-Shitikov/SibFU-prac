@@ -100,6 +100,31 @@ class MainWindow(QMainWindow):
 
         blur_layout.addStretch()
 
+        circle_layout = QHBoxLayout()
+        root_layout.addLayout(circle_layout)
+
+        circle_layout.addWidget(QLabel("Круг: X"))
+        self.circle_x_spin = QSpinBox()
+        self.circle_x_spin.setRange(0, 100000)
+        circle_layout.addWidget(self.circle_x_spin)
+
+        circle_layout.addWidget(QLabel("Y"))
+        self.circle_y_spin = QSpinBox()
+        self.circle_y_spin.setRange(0, 100000)
+        circle_layout.addWidget(self.circle_y_spin)
+
+        circle_layout.addWidget(QLabel("Радиус"))
+        self.circle_radius_spin = QSpinBox()
+        self.circle_radius_spin.setRange(1, 100000)
+        self.circle_radius_spin.setValue(30)
+        circle_layout.addWidget(self.circle_radius_spin)
+
+        self.circle_button = QPushButton("Нарисовать круг")
+        self.circle_button.clicked.connect(self.on_draw_circle)
+        circle_layout.addWidget(self.circle_button)
+
+        circle_layout.addStretch()
+
         self.image_label = QLabel("Изображение не загружено")
         self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.image_label.setMinimumSize(400, 300)
@@ -186,6 +211,25 @@ class MainWindow(QMainWindow):
 
         self.show_image(result)
         self.statusBar().showMessage(f"Усреднение с ядром {kernel_size}x{kernel_size}")
+
+    def on_draw_circle(self):
+        if self.image is None:
+            QMessageBox.warning(self, "Нет изображения", "Сначала загрузите изображение или сделайте снимок с камеры.")
+            return
+
+        x = self.circle_x_spin.value()
+        y = self.circle_y_spin.value()
+        radius = self.circle_radius_spin.value()
+
+        try:
+            result = image_ops.draw_circle(self.image, x, y, radius)
+        except ValueError as e:
+            QMessageBox.critical(self, "Ошибка рисования круга", str(e))
+            self.statusBar().showMessage("Ошибка при рисовании круга")
+            return
+
+        self.show_image(result)
+        self.statusBar().showMessage(f"Круг: центр ({x}, {y}), радиус {radius}")
 
     def show_image(self, cv_img):
         rgb = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
