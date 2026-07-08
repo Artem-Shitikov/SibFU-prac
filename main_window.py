@@ -37,6 +37,10 @@ class MainWindow(QMainWindow):
         self.load_button.clicked.connect(self.on_load_image)
         controls_layout.addWidget(self.load_button)
 
+        self.capture_button = QPushButton("Снимок с веб-камеры")
+        self.capture_button.clicked.connect(self.on_capture_photo)
+        controls_layout.addWidget(self.capture_button)
+
         controls_layout.addStretch()
 
         self.image_label = QLabel("Изображение не загружено")
@@ -67,6 +71,18 @@ class MainWindow(QMainWindow):
         self.image = image
         self.show_image(self.image)
         self.statusBar().showMessage(f"Загружено: {path}")
+
+    def on_capture_photo(self):
+        try:
+            image = image_ops.capture_photo()
+        except RuntimeError as e:
+            QMessageBox.critical(self, "Ошибка веб-камеры", str(e))
+            self.statusBar().showMessage("Ошибка при съёмке с веб-камеры")
+            return
+
+        self.image = image
+        self.show_image(self.image)
+        self.statusBar().showMessage("Снимок с веб-камеры сделан")
 
     def show_image(self, cv_img):
         rgb = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
