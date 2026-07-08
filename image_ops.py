@@ -54,3 +54,10 @@ def crop_image(image: np.ndarray, x1: int, y1: int, x2: int, y2: int) -> np.ndar
         )
 
     return image[y1:y2, x1:x2].copy()
+
+
+def blur_image(image: np.ndarray, kernel_size: int) -> np.ndarray:
+    if kernel_size < 1:
+        raise ValueError(f"Размер ядра должен быть положительным числом, получено: {kernel_size}")
+
+    return cv2.blur(image, (kernel_size, kernel_size))

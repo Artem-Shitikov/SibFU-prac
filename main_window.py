@@ -85,6 +85,21 @@ class MainWindow(QMainWindow):
 
         crop_layout.addStretch()
 
+        blur_layout = QHBoxLayout()
+        root_layout.addLayout(blur_layout)
+
+        blur_layout.addWidget(QLabel("Усреднение: размер ядра"))
+        self.blur_kernel_spin = QSpinBox()
+        self.blur_kernel_spin.setRange(1, 200)
+        self.blur_kernel_spin.setValue(5)
+        blur_layout.addWidget(self.blur_kernel_spin)
+
+        self.blur_button = QPushButton("Усреднить")
+        self.blur_button.clicked.connect(self.on_blur)
+        blur_layout.addWidget(self.blur_button)
+
+        blur_layout.addStretch()
+
         self.image_label = QLabel("Изображение не загружено")
         self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.image_label.setMinimumSize(400, 300)
@@ -154,6 +169,23 @@ class MainWindow(QMainWindow):
 
         self.show_image(result)
         self.statusBar().showMessage(f"Обрезано: ({x1}, {y1}) - ({x2}, {y2})")
+
+    def on_blur(self):
+        if self.image is None:
+            QMessageBox.warning(self, "Нет изображения", "Сначала загрузите изображение или сделайте снимок с камеры.")
+            return
+
+        kernel_size = self.blur_kernel_spin.value()
+
+        try:
+            result = image_ops.blur_image(self.image, kernel_size)
+        except ValueError as e:
+            QMessageBox.critical(self, "Ошибка усреднения", str(e))
+            self.statusBar().showMessage("Ошибка при усреднении изображения")
+            return
+
+        self.show_image(result)
+        self.statusBar().showMessage(f"Усреднение с ядром {kernel_size}x{kernel_size}")
 
     def show_image(self, cv_img):
         rgb = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
