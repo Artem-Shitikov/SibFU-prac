@@ -43,6 +43,16 @@ class MainWindow(QMainWindow):
 
         controls_layout.addStretch()
 
+        channels_layout = QHBoxLayout()
+        root_layout.addLayout(channels_layout)
+
+        channels_layout.addWidget(QLabel("Показать канал:"))
+        for channel in ("R", "G", "B"):
+            button = QPushButton(channel)
+            button.clicked.connect(lambda checked=False, ch=channel: self.on_show_channel(ch))
+            channels_layout.addWidget(button)
+        channels_layout.addStretch()
+
         self.image_label = QLabel("Изображение не загружено")
         self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.image_label.setMinimumSize(400, 300)
@@ -83,6 +93,15 @@ class MainWindow(QMainWindow):
         self.image = image
         self.show_image(self.image)
         self.statusBar().showMessage("Снимок с веб-камеры сделан")
+
+    def on_show_channel(self, channel: str):
+        if self.image is None:
+            QMessageBox.warning(self, "Нет изображения", "Сначала загрузите изображение или сделайте снимок с камеры.")
+            return
+
+        result = image_ops.extract_channel(self.image, channel)
+        self.show_image(result)
+        self.statusBar().showMessage(f"Показан канал: {channel}")
 
     def show_image(self, cv_img):
         rgb = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)

@@ -1,4 +1,7 @@
 import cv2
+import numpy as np
+
+CHANNEL_INDEX = {"B": 0, "G": 1, "R": 2}
 
 
 def load_image(path: str):
@@ -23,3 +26,13 @@ def capture_photo(camera_index: int = 0):
     if not ret:
         raise RuntimeError("Не удалось сделать снимок с веб-камеры")
     return frame
+
+
+def extract_channel(image: np.ndarray, channel: str) -> np.ndarray:
+    if channel not in CHANNEL_INDEX:
+        raise ValueError(f"Неизвестный канал: {channel}. Допустимые значения: R, G, B")
+
+    idx = CHANNEL_INDEX[channel]
+    result = np.zeros_like(image)
+    result[:, :, idx] = image[:, :, idx]
+    return result
